@@ -9,18 +9,20 @@ export async function generateStudyQuiz(
   lessons: SubjectLesson[],
   language: Language = 'vi'
 ): Promise<Question[]> {
-  const model = 'gemini-3-pro-preview';
+  // Sử dụng Gemini 3 Flash - Model nhanh nhất hiện tại
+  const model = 'gemini-3-flash-preview';
   
+  // Tối ưu prompt: Yêu cầu số lượng câu hỏi vừa đủ (3 câu/môn) để giảm thời gian sinh văn bản
   const prompt = `
-    You are the "Study Architect". Generate a multiple-choice quiz for a ${grade} student.
-    Lessons and textbooks:
+    Generate a concise multiple-choice quiz for a ${grade} student.
+    Context:
     ${lessons.map(l => `- Subject: ${l.subject} (Book: ${l.textbook}): ${l.lesson}`).join('\n')}
     
-    REQUIREMENTS:
-    1. At least 5 questions per subject.
-    2. CONTENT MUST BE IN ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}.
-    3. MIX DIFFICULTIES: Include 'easy', 'medium', and 'hard' questions.
-    4. Accuracy is key. Provide short, encouraging explanations.
+    Rules:
+    1. Exactly 3 high-quality questions per subject (to ensure speed).
+    2. Output in ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}.
+    3. Short explanations (max 15 words).
+    4. Mix difficulty: easy, medium, hard.
   `;
 
   const response = await ai.models.generateContent({
@@ -28,6 +30,10 @@ export async function generateStudyQuiz(
     contents: prompt,
     config: {
       responseMimeType: "application/json",
+      // Vô hiệu hóa thinking để giảm độ trễ (latency) tối đa
+      thinkingConfig: { thinkingBudget: 0 },
+      // Giới hạn tokens để model không viết quá dài
+      maxOutputTokens: 1500,
       responseSchema: {
         type: Type.OBJECT,
         properties: {
@@ -47,7 +53,7 @@ export async function generateStudyQuiz(
                 explanation: { type: Type.STRING },
                 difficulty: { 
                   type: Type.STRING, 
-                  description: "Must be 'easy', 'medium', or 'hard'" 
+                  description: "easy, medium, or hard" 
                 }
               },
               required: ["id", "subject", "questionText", "options", "correctAnswerIndex", "explanation", "difficulty"]
@@ -66,22 +72,24 @@ export async function generateStudyQuiz(
 export async function chatWithPetStream(
   profile: UserProfile, 
   message: string, 
-  history: { role: 'user' | 'model', parts: { text: string }[] }[]
+  history: { role: 'user' | 'model', parts: { text: string }[] }[],
+  context: { todaySubjects: string[], timeStudiedToday: number }
 ) {
   const model = 'gemini-3-flash-preview';
   const lang = profile.language === 'vi' ? 'Vietnamese' : 'English';
   
+  const dailyGoalSeconds = (profile.dailyGoalHours || 3) * 3600;
+  const progressPercent = Math.min(100, Math.floor((context.timeStudiedToday / dailyGoalSeconds) * 100));
+  const remainingSubjects = context.todaySubjects.join(', ');
+
   const systemInstruction = `
-    You are ${profile.pet.name}, a study mascot.
-    You are chatting with ${profile.username} in ${lang}.
+    Bạn là ${profile.pet.name}, linh vật học tập. Trò chuyện với ${profile.username} bằng tiếng ${lang}.
+    Streak: ${profile.streak} ngày. Tiến độ: ${progressPercent}%. Cần học: ${remainingSubjects}.
     
-    RULES:
-    - REPLY EXTREMELY BRIEFLY (Max 2 short sentences).
-    - Tone: Powerful, cheeky, loves "eating" knowledge to grow.
-    - Current streak: ${profile.streak}. Praise if high.
-    - Current IQ: ${profile.pet.iq}. Level: ${profile.pet.level}.
-    - Use emojis: 🦖, 🦕, 🌿, ✨.
-    ${profile.language === 'vi' ? 'Xưng "Tớ" gọi "Cậu" hoặc tên.' : 'Use friendly English.'}
+    PHONG CÁCH: 
+    - TRẢ LỜI CỰC NGẮN (dưới 15 từ).
+    - Năng động, lém lỉnh, dùng emoji (🦖, ✨, ⚡).
+    - Không giải thích dài dòng.
   `;
 
   const responseStream = await ai.models.generateContentStream({
@@ -89,7 +97,9 @@ export async function chatWithPetStream(
     contents: [...history, { role: 'user', parts: [{ text: message }] }],
     config: { 
       systemInstruction,
-      thinkingConfig: { thinkingBudget: 0 }
+      temperature: 0.5, // Thấp hơn để phản hồi nhanh và ổn định hơn
+      thinkingConfig: { thinkingBudget: 0 },
+      maxOutputTokens: 150 // Giới hạn độ dài để stream nhanh hơn nữa
     }
   });
 

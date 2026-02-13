@@ -83,50 +83,52 @@ const Dashboard: React.FC<Props> = ({ profile, onStartQuiz, onOpenChat, onEditSc
   const iqTitle = getIQTitle(profile.pet.iq);
 
   return (
-    <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-10 animate-fadeIn">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-black text-slate-950 dark:text-white transition-colors">{t.welcome} {profile.username}! 👋</h1>
+    <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-6 md:space-y-10 animate-fadeIn">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+        <div className="max-w-full overflow-hidden text-center md:text-left">
+          <h1 className="text-3xl md:text-4xl font-black text-slate-950 dark:text-white transition-colors truncate">
+            {t.welcome} {profile.username}! 👋
+          </h1>
         </div>
         <button 
           onClick={onEditSchedule}
-          className="px-6 py-3 bg-slate-100 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl font-black text-sm uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center gap-3"
+          className="w-full md:w-auto px-6 py-3 bg-slate-100 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-2xl font-black text-sm uppercase tracking-widest text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-3 shrink-0"
         >
           <span>📅</span> {t.editPlan}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1 bg-white dark:bg-slate-950 p-10 rounded-[3rem] shadow-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center text-center relative transition-all">
-          <div className="absolute top-6 right-6 bg-slate-950 dark:bg-white text-white dark:text-black text-[11px] font-black px-4 py-1.5 rounded-full shadow-lg z-10">Cấp {profile.pet.level}</div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="lg:col-span-1 bg-white dark:bg-slate-950 p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] shadow-xl border border-slate-200 dark:border-slate-800 flex flex-col items-center text-center relative transition-all">
+          <div className="absolute top-4 right-4 md:top-6 md:right-6 bg-slate-950 dark:bg-white text-white dark:text-black text-[10px] md:text-[11px] font-black px-3 py-1 md:px-4 md:py-1.5 rounded-full shadow-lg z-10">Cấp {profile.pet.level}</div>
           
-          <div className="relative mb-6">
-             <div className="w-40 h-40 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-8xl shadow-inner border-4 border-white dark:border-slate-800 animate-float">
+          <div className="relative mb-4 md:mb-6 mt-4">
+             <div className="w-32 h-32 md:w-40 md:h-40 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center text-6xl md:text-8xl shadow-inner border-4 border-white dark:border-slate-800 animate-float">
                {petInfo.icon}
              </div>
           </div>
 
-          <h2 className="text-3xl font-black text-slate-950 dark:text-white mb-1 leading-tight">{profile.pet.name}</h2>
-          <p className={`text-green-600 font-black text-sm uppercase tracking-[0.1em] mb-6`}>{petInfo.label}</p>
+          <h2 className="text-2xl md:text-3xl font-black text-slate-950 dark:text-white mb-1 leading-tight w-full truncate px-4">{profile.pet.name}</h2>
+          <p className={`text-green-600 font-black text-xs md:text-sm uppercase tracking-[0.1em] mb-4 md:mb-6 truncate w-full px-2`}>{petInfo.label}</p>
           
-          {/* Thanh EXP - Màu Tím (Layout mới giống ảnh người dùng cung cấp) */}
-          <div className="w-full mb-6">
-            <div className="flex justify-between items-center mb-2 px-1">
-              <span className="text-xs font-black text-purple-600 uppercase">EXP</span>
-              <span className="text-sm font-black text-purple-600">{expPercentage}/100</span>
+          {/* Thanh EXP */}
+          <div className="w-full mb-4 md:mb-6 px-2">
+            <div className="flex justify-between items-center mb-1.5 px-1">
+              <span className="text-[10px] font-black text-purple-600 uppercase">EXP</span>
+              <span className="text-xs font-black text-purple-600">{expPercentage}/100</span>
             </div>
-            <div className="w-full bg-slate-100 dark:bg-slate-900 h-4 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 p-0.5">
+            <div className="w-full bg-slate-100 dark:bg-slate-900 h-3 md:h-4 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 p-0.5">
               <div className="h-full bg-purple-500 rounded-full transition-all duration-700" style={{ width: `${expPercentage}%` }}></div>
             </div>
           </div>
 
-          {/* Thanh IQ - Màu Cyan */}
-          <div className="w-full mb-10">
-            <div className="flex justify-between items-center mb-2 px-1">
-              <span className="text-xs font-black text-cyan-600 uppercase">IQ: {profile.pet.iq}</span>
-              <span className="text-sm font-black text-cyan-600">{iqTitle}</span>
+          {/* Thanh IQ */}
+          <div className="w-full mb-8 md:mb-10 px-2">
+            <div className="flex justify-between items-center mb-1.5 px-1">
+              <span className="text-[10px] font-black text-cyan-600 uppercase">IQ: {profile.pet.iq}</span>
+              <span className="text-xs font-black text-cyan-600">{iqTitle}</span>
             </div>
-            <div className="w-full bg-slate-100 dark:bg-slate-900 h-4 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 p-0.5">
+            <div className="w-full bg-slate-100 dark:bg-slate-900 h-3 md:h-4 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800 p-0.5">
               <div className="h-full bg-cyan-500 rounded-full transition-all duration-700" style={{ width: `${iqPercentage}%` }}></div>
             </div>
           </div>
@@ -134,46 +136,46 @@ const Dashboard: React.FC<Props> = ({ profile, onStartQuiz, onOpenChat, onEditSc
           <button 
             type="button"
             onClick={onOpenChat}
-            className="w-full py-6 bg-green-600 text-white font-black rounded-[1.8rem] transition-all flex items-center justify-center space-x-3 shadow-xl hover:bg-green-700 active:scale-95 group overflow-hidden"
+            className="w-full py-5 md:py-6 bg-green-600 text-white font-black rounded-[1.5rem] md:rounded-[1.8rem] transition-all flex items-center justify-center space-x-3 shadow-xl hover:bg-green-700 active:scale-95 group overflow-hidden"
           >
-            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-xl group-hover:scale-125 transition-transform">💬</div>
-            <span className="text-lg">Chat với {profile.pet.name}</span>
+            <div className="w-7 h-7 md:w-8 md:h-8 bg-white/20 rounded-full flex items-center justify-center text-lg md:text-xl group-hover:scale-125 transition-transform">💬</div>
+            <span className="text-base md:text-lg truncate">Chat với {profile.pet.name}</span>
           </button>
         </div>
 
-        <div className="lg:col-span-2 space-y-8">
-          <div className={`p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden bg-gradient-to-br from-green-600 to-emerald-800`}>
+        <div className="lg:col-span-2 space-y-6 md:space-y-8">
+          <div className={`p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] text-white shadow-2xl relative overflow-hidden bg-gradient-to-br from-green-600 to-emerald-800`}>
              <div className="relative z-10">
-               <h2 className="text-3xl font-black mb-4 flex items-center">
+               <h2 className="text-2xl md:text-3xl font-black mb-3 md:mb-4 flex items-center">
                  <span className="mr-3">📖</span> Luyện tập hôm nay
                </h2>
-               <p className="text-white/90 font-bold text-lg mb-6">{t.subjectsToFinish} {today}:</p>
-               <div className="flex flex-wrap gap-3">
+               <p className="text-white/90 font-bold text-base md:text-lg mb-4 md:mb-6">{t.subjectsToFinish} {today}:</p>
+               <div className="flex flex-wrap gap-2 md:gap-3">
                  {studySubjects.length > 0 ? studySubjects.map(s => (
-                   <span key={s} className="px-5 py-3 bg-white/15 backdrop-blur-xl rounded-2xl text-base font-black border border-white/20">
+                   <span key={s} className="px-4 py-2 md:px-5 md:py-3 bg-white/15 backdrop-blur-xl rounded-xl md:rounded-2xl text-sm md:text-base font-black border border-white/20">
                      {s}
                    </span>
-                 )) : <span className="text-white/70 italic font-bold text-lg">{t.restDay}</span>}
+                 )) : <span className="text-white/70 italic font-bold text-base md:text-lg">{t.restDay}</span>}
                </div>
              </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-950 p-10 rounded-[3rem] shadow-xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="text-center md:text-left">
-              <div className="text-[12px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.3em] mb-2">{t.currentStreak}</div>
-              <div className="text-6xl font-black text-amber-500 flex items-center justify-center md:justify-start">
-                <span className="mr-4">🔥</span> {profile.streak} <span className="text-2xl ml-4 text-slate-400 font-black uppercase tracking-tighter">{t.streak}</span>
+          <div className="bg-white dark:bg-slate-950 p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] shadow-xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+            <div className="text-center md:text-left w-full md:w-auto">
+              <div className="text-[10px] md:text-[12px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em] mb-1 md:mb-2">{t.currentStreak}</div>
+              <div className="text-5xl md:text-6xl font-black text-amber-500 flex items-center justify-center md:justify-start">
+                <span className="mr-3 md:mr-4">🔥</span> {profile.streak} <span className="text-xl md:text-2xl ml-2 md:ml-4 text-slate-400 font-black uppercase tracking-tighter">{t.streak}</span>
               </div>
             </div>
             <button
               type="button"
               onClick={onStartQuiz}
               disabled={isLocked || studySubjects.length === 0}
-              className={`w-full md:w-auto px-16 py-8 rounded-[2.5rem] font-black text-2xl shadow-2xl transition-all ${
+              className={`w-full md:w-auto px-8 md:px-16 py-6 md:py-8 rounded-[1.8rem] md:rounded-[2.5rem] font-black text-xl md:text-2xl shadow-2xl transition-all ${
                 isLocked ? 'bg-slate-100 text-slate-400' : 'bg-[#0ea5e9] text-white hover:scale-105 shadow-sky-200/50'
               }`}
             >
-              {isLocked ? `Chờ ${timeLeft}p` : `LUYỆN TẬP NGAY ⚡`}
+              {isLocked ? `Chờ ${timeLeft}p` : `HỌC NGAY ⚡`}
             </button>
           </div>
         </div>

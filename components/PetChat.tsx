@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile, PetAvatarType } from '../types';
 import { chatWithPetStream } from '../geminiService';
+import { DAYS_OF_WEEK } from '../constants';
 
 interface Props {
   profile: UserProfile;
@@ -10,7 +11,7 @@ interface Props {
 
 const PetChat: React.FC<Props> = ({ profile, onClose }) => {
   const [messages, setMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
-    { role: 'model', text: `Chào ${profile.username}! Tớ là ${profile.pet.name} đây. Hôm nay cậu muốn "ăn" kiến thức môn gì nào? 🌿` }
+    { role: 'model', text: `Chào ${profile.username}! Tớ là ${profile.pet.name} đây. Hôm nay cậu muốn "ăn" kiến thức môn gì nào? ⚡` }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -33,14 +34,25 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
 
     try {
       const history = messages.map(m => ({ role: m.role, parts: [{ text: m.text }] }));
-      const responseStream = await chatWithPetStream(profile, userMsg, history);
+      
+      // Lấy ngữ cảnh thực tế cho AI
+      const today = DAYS_OF_WEEK[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+      const todaySubjects = profile.schedule[today] || [];
+      const todayStr = new Date().toISOString().split('T')[0];
+      const timeStudiedToday = profile.studyHistory?.[todayStr] || 0;
+
+      const responseStream = await chatWithPetStream(
+        profile, 
+        userMsg, 
+        history, 
+        { todaySubjects, timeStudiedToday }
+      );
       
       let fullText = "";
       for await (const chunk of responseStream) {
         const chunkText = chunk.text;
         if (chunkText) {
           fullText += chunkText;
-          // Cập nhật tin nhắn cuối cùng trong danh sách
           setMessages(prev => {
             const newMsgs = [...prev];
             newMsgs[newMsgs.length - 1] = { role: 'model', text: fullText };
@@ -52,7 +64,7 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
       console.error("Chat Error:", error);
       setMessages(prev => {
         const newMsgs = [...prev];
-        newMsgs[newMsgs.length - 1] = { role: 'model', text: 'Tớ đang bận suy nghĩ một chút, tí tớ trả lời nhé! 😅' };
+        newMsgs[newMsgs.length - 1] = { role: 'model', text: 'Tớ đang bận học một chút, tí tớ trả lời nhé! 🦖' };
         return newMsgs;
       });
     } finally {
@@ -60,8 +72,8 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
     }
   };
 
-  const getPetVisualData = (type: PetAvatarType, streak: number) => {
-    const stage = streak >= 60 ? 3 : streak >= 30 ? 2 : streak >= 8 ? 1 : 0;
+  const getPetVisualData = (type: PetAvatarType, level: number) => {
+    const stage = level >= 10 ? 3 : level >= 5 ? 2 : level >= 2 ? 1 : 0;
     const visuals: Record<PetAvatarType, string[]> = {
       classic: ['🥚', '🦖', '🦕', '🐲'],
       cyber: ['💾', '🤖', '🦾', '🛸'],
@@ -104,7 +116,7 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
     };
   };
 
-  const visual = getPetVisualData(profile.pet.avatarType, profile.streak);
+  const visual = getPetVisualData(profile.pet.avatarType, profile.pet.level);
 
   return (
     <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-end md:items-center justify-center p-4 z-50">
@@ -120,19 +132,27 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
                 <span className="text-5xl">{visual.emoji}</span>
               </div>
               <div>
-                <h3 className="font-black text-xl">{profile.pet.name}</h3>
-                <p className="text-white/60 text-[10px] font-black uppercase tracking-widest">Linh Vật Cấp: {visual.stageName}</p>
+                <h3 className="font-black text-2xl">{profile.pet.name}</h3>
+                <p className="text-white/60 text-[11px] font-black uppercase tracking-widest">{visual.stageName} • LV.{profile.pet.level}</p>
               </div>
             </div>
-            <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all font-black text-xl">✕</button>
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={onClose} 
+                className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl font-black text-xs uppercase tracking-widest hover:bg-white/30 transition-all border border-white/10"
+              >
+                Quay lại
+              </button>
+              <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all font-black text-2xl">✕</button>
+            </div>
           </div>
         </div>
 
         {/* Chat Area */}
-        <div ref={scrollRef} className="flex-grow overflow-y-auto p-6 space-y-4 bg-slate-50 dark:bg-slate-950 custom-scrollbar transition-colors">
+        <div ref={scrollRef} className="flex-grow overflow-y-auto p-6 space-y-5 bg-slate-50 dark:bg-slate-950 custom-scrollbar transition-colors">
           {messages.map((m, idx) => (
             <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] p-4 rounded-3xl font-bold text-sm shadow-sm leading-relaxed transition-all ${
+              <div className={`max-w-[85%] p-5 rounded-3xl font-bold text-base shadow-sm leading-relaxed transition-all ${
                 m.role === 'user' 
                 ? `${visual.bgColor} text-white rounded-tr-none` 
                 : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none border border-slate-100 dark:border-slate-700'
@@ -144,9 +164,9 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
           {isTyping && messages[messages.length-1].text === "" && (
             <div className="flex justify-start">
               <div className="bg-white dark:bg-slate-800 p-4 rounded-3xl rounded-tl-none border border-slate-100 dark:border-slate-700 space-x-1 flex shadow-sm">
-                <div className={`w-2 h-2 rounded-full animate-bounce ${visual.bgColor.replace('bg-', 'bg-opacity-50 bg-')}`}></div>
-                <div className={`w-2 h-2 rounded-full animate-bounce delay-100 ${visual.bgColor.replace('bg-', 'bg-opacity-75 bg-')}`}></div>
-                <div className={`w-2 h-2 rounded-full animate-bounce delay-200 ${visual.bgColor}`}></div>
+                <div className={`w-2.5 h-2.5 rounded-full animate-bounce ${visual.bgColor.replace('bg-', 'bg-opacity-50 bg-')}`}></div>
+                <div className={`w-2.5 h-2.5 rounded-full animate-bounce delay-100 ${visual.bgColor.replace('bg-', 'bg-opacity-75 bg-')}`}></div>
+                <div className={`w-2.5 h-2.5 rounded-full animate-bounce delay-200 ${visual.bgColor}`}></div>
               </div>
             </div>
           )}
@@ -160,8 +180,8 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder={`Nhắn gì đó cho ${profile.pet.name}...`}
-              className="flex-grow bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 focus:border-green-500 outline-none font-bold placeholder:text-slate-300 dark:placeholder:text-slate-600 dark:text-white transition-all"
+              placeholder={`Hỏi ${profile.pet.name} bất cứ điều gì...`}
+              className="flex-grow bg-slate-50 dark:bg-slate-800 p-4.5 rounded-2xl border-2 border-slate-100 dark:border-slate-700 focus:border-green-500 outline-none font-black text-sm placeholder:text-slate-300 dark:placeholder:text-slate-600 dark:text-white transition-all shadow-sm"
             />
             <button 
               onClick={handleSend}
