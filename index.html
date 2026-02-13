@@ -7,21 +7,21 @@
     <title>Study Streak - Học Tập Liên Tục</title>
     <!-- Thẻ base giúp định vị tài nguyên luôn từ gốc -->
     <base href="/">
-    <!-- Thêm Google Fonts Open Sans & Montserrat -->
+    <!-- Thêm Google Fonts Roboto -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Cấu hình Tailwind hỗ trợ Open Sans (sans) và Montserrat (display)
+      // Cấu hình Tailwind hỗ trợ Roboto cho cả sans và display để đảm bảo tính nhất quán
       tailwind.config = {
         darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
-              sans: ['"Open Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-              display: ['Montserrat', 'sans-serif'],
+              sans: ['Roboto', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              display: ['Roboto', 'sans-serif'],
             },
             colors: {
               slate: {
@@ -34,7 +34,7 @@
     </script>
     <style>
         body {
-            font-family: 'Open Sans', sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: #ffffff;
             margin: 0;
             padding: 0;
