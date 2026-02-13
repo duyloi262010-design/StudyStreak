@@ -5,12 +5,10 @@ import { UserProfile } from '../types';
 interface Props {
   profile: UserProfile;
   onBack: () => void;
-  // Giả sử App.tsx truyền thêm hàm cập nhật profile vào đây (optional enhancement)
-  // Nếu không, ta sẽ dựa vào ProfileModal để đổi. Nhưng để đáp ứng yêu cầu "có thể sửa", 
-  // ta sẽ gọi trực tiếp một hàm update từ App nếu được, hoặc ít nhất là cung cấp UI sửa tại đây.
+  onUpdateProfile?: (updated: UserProfile) => void;
 }
 
-const ProgressView: React.FC<Props & { onUpdateProfile?: (updated: UserProfile) => void }> = ({ profile, onBack, onUpdateProfile }) => {
+const ProgressView: React.FC<Props> = ({ profile, onBack, onUpdateProfile }) => {
   const [dailyGoal, setDailyGoal] = useState(profile.dailyGoalHours || 3);
   
   // Chuẩn bị dữ liệu cho 7 ngày gần nhất
@@ -57,7 +55,7 @@ const ProgressView: React.FC<Props & { onUpdateProfile?: (updated: UserProfile) 
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 md:p-10 animate-fadeIn">
+    <div className="max-w-5xl mx-auto p-4 md:p-10 animate-fadeIn font-sans">
       <div className="flex items-center justify-between mb-10">
         <div>
            <h2 className="text-3xl font-black text-slate-950 dark:text-white uppercase tracking-tighter">Tiến độ học tập 📈</h2>

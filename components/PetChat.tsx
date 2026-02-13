@@ -29,13 +29,11 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setIsTyping(true);
 
-    // Tạo một tin nhắn rỗng cho model để bắt đầu stream vào đó
     setMessages(prev => [...prev, { role: 'model', text: '' }]);
 
     try {
       const history = messages.map(m => ({ role: m.role, parts: [{ text: m.text }] }));
       
-      // Lấy ngữ cảnh thực tế cho AI
       const today = DAYS_OF_WEEK[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
       const todaySubjects = profile.schedule[today] || [];
       const todayStr = new Date().toISOString().split('T')[0];
@@ -119,21 +117,21 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
   const visual = getPetVisualData(profile.pet.avatarType, profile.pet.level);
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-end md:items-center justify-center p-4 z-50">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl flex flex-col h-[85vh] md:h-[700px] overflow-hidden animate-scaleIn border-b-8 border-slate-100 dark:border-slate-800 transition-colors">
+    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-end md:items-center justify-center p-4 z-50 font-sans">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2rem] shadow-2xl flex flex-col h-[85vh] md:h-[700px] overflow-hidden animate-scaleIn border-b-8 border-slate-100 dark:border-slate-800 transition-colors">
         {/* Header */}
-        <div className={`${visual.bgColor} p-6 text-white relative overflow-hidden`}>
+        <div className={`${visual.bgColor} p-5 md:p-6 text-white relative overflow-hidden`}>
           <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none">
             <span className="text-[10rem]">{visual.emoji}</span>
           </div>
           <div className="flex items-center justify-between relative z-10">
             <div className="flex items-center space-x-4">
-              <div className={`bg-white/20 p-3 rounded-3xl backdrop-blur-md border border-white/20 ${visual.animation}`}>
+              <div className={`bg-white/20 p-3 rounded-2xl backdrop-blur-md border border-white/20 ${visual.animation}`}>
                 <span className="text-5xl">{visual.emoji}</span>
               </div>
               <div>
                 <h3 className="font-black text-2xl">{profile.pet.name}</h3>
-                <p className="text-white/60 text-[11px] font-black uppercase tracking-widest">{visual.stageName} • LV.{profile.pet.level}</p>
+                <p className="text-white/60 text-[10px] font-black uppercase tracking-widest">{visual.stageName} • LV.{profile.pet.level}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -149,10 +147,10 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
         </div>
 
         {/* Chat Area */}
-        <div ref={scrollRef} className="flex-grow overflow-y-auto p-6 space-y-5 bg-slate-50 dark:bg-slate-950 custom-scrollbar transition-colors">
+        <div ref={scrollRef} className="flex-grow overflow-y-auto p-5 md:p-6 space-y-5 bg-slate-50 dark:bg-slate-950 custom-scrollbar transition-colors">
           {messages.map((m, idx) => (
             <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] p-5 rounded-3xl font-bold text-base shadow-sm leading-relaxed transition-all ${
+              <div className={`max-w-[85%] p-4 rounded-[1.5rem] font-bold text-base shadow-sm leading-relaxed transition-all ${
                 m.role === 'user' 
                 ? `${visual.bgColor} text-white rounded-tr-none` 
                 : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none border border-slate-100 dark:border-slate-700'
@@ -163,7 +161,7 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
           ))}
           {isTyping && messages[messages.length-1].text === "" && (
             <div className="flex justify-start">
-              <div className="bg-white dark:bg-slate-800 p-4 rounded-3xl rounded-tl-none border border-slate-100 dark:border-slate-700 space-x-1 flex shadow-sm">
+              <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700 space-x-2 flex shadow-sm">
                 <div className={`w-2.5 h-2.5 rounded-full animate-bounce ${visual.bgColor.replace('bg-', 'bg-opacity-50 bg-')}`}></div>
                 <div className={`w-2.5 h-2.5 rounded-full animate-bounce delay-100 ${visual.bgColor.replace('bg-', 'bg-opacity-75 bg-')}`}></div>
                 <div className={`w-2.5 h-2.5 rounded-full animate-bounce delay-200 ${visual.bgColor}`}></div>
@@ -173,7 +171,7 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
         </div>
 
         {/* Input */}
-        <div className="p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 transition-colors">
+        <div className="p-5 md:p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 transition-colors">
           <div className="flex space-x-3">
             <input
               type="text"
@@ -181,24 +179,18 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder={`Hỏi ${profile.pet.name} bất cứ điều gì...`}
-              className="flex-grow bg-slate-50 dark:bg-slate-800 p-4.5 rounded-2xl border-2 border-slate-100 dark:border-slate-700 focus:border-green-500 outline-none font-black text-sm placeholder:text-slate-300 dark:placeholder:text-slate-600 dark:text-white transition-all shadow-sm"
+              className="flex-grow bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border-2 border-slate-100 dark:border-slate-700 focus:border-green-500 outline-none font-black text-sm md:text-base placeholder:text-slate-300 dark:placeholder:text-slate-600 dark:text-white transition-all shadow-sm"
             />
             <button 
               onClick={handleSend}
               disabled={!input.trim() || isTyping}
-              className={`w-14 h-14 text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 ${visual.bgColor}`}
+              className={`w-14 h-14 text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 ${visual.bgColor}`}
             >
               🚀
             </button>
           </div>
         </div>
       </div>
-      <style>{`
-        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
-        @keyframes mighty { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px currentColor); } 50% { transform: scale(1.1); filter: drop-shadow(0 0 15px currentColor); } }
-        .animate-float { animation: float 3s ease-in-out infinite; }
-        .animate-mighty { animation: mighty 2s ease-in-out infinite; }
-      `}</style>
     </div>
   );
 };

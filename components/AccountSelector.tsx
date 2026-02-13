@@ -28,10 +28,10 @@ const AccountSelector: React.FC<Props> = ({ profiles, onSelect, onAdd }) => {
   const t = TRANSLATIONS['vi']; // Default to VI for selector
 
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 animate-fadeIn">
+    <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 animate-fadeIn font-sans">
       <div className="text-center mb-16">
-        <h1 className="text-5xl md:text-6xl font-black text-slate-950 dark:text-white mb-6 tracking-tight italic">{t.whoIsStudying}</h1>
-        <p className="text-slate-600 dark:text-slate-400 font-bold text-2xl">{t.chooseProfile}</p>
+        <h1 className="font-display text-5xl md:text-6xl font-black text-slate-950 dark:text-white mb-6 tracking-tight italic">{t.whoIsStudying}</h1>
+        <p className="font-display text-slate-600 dark:text-slate-400 font-bold text-2xl">{t.chooseProfile}</p>
       </div>
 
       <div className="flex flex-wrap justify-center gap-12 max-w-6xl">
@@ -46,14 +46,14 @@ const AccountSelector: React.FC<Props> = ({ profiles, onSelect, onAdd }) => {
                 {profile.avatar || getAccountPetEmoji(profile.pet.avatarType, profile.streak)}
               </span>
               {profile.streak > 0 && (
-                <div className="absolute bottom-4 right-4 bg-amber-500 text-slate-950 text-xs font-black px-3 py-1.5 rounded-xl shadow-lg border-2 border-white">
+                <div className="font-display absolute bottom-4 right-4 bg-amber-500 text-slate-950 text-xs font-black px-3 py-1.5 rounded-xl shadow-lg border-2 border-white">
                   🔥 {profile.streak}
                 </div>
               )}
             </div>
             <div className="text-center">
-              <p className="font-black text-slate-950 dark:text-white text-2xl uppercase tracking-tight">{profile.username}</p>
-              <p className="text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] mt-1">{profile.grade}</p>
+              <p className="font-display font-black text-slate-950 dark:text-white text-2xl uppercase tracking-tight">{profile.username}</p>
+              <p className="font-display text-[12px] font-black text-slate-500 uppercase tracking-[0.4em] mt-1">{profile.grade}</p>
             </div>
           </button>
         ))}
@@ -66,8 +66,8 @@ const AccountSelector: React.FC<Props> = ({ profiles, onSelect, onAdd }) => {
             ➕
           </div>
           <div className="text-center">
-            <p className="font-black text-slate-400 text-2xl group-hover:text-blue-600">{t.addNew}</p>
-            <p className="text-[12px] font-black text-slate-300 uppercase tracking-[0.4em] mt-1">{t.account}</p>
+            <p className="font-display font-black text-slate-400 text-2xl group-hover:text-blue-600">{t.addNew}</p>
+            <p className="font-display text-[12px] font-black text-slate-300 uppercase tracking-[0.4em] mt-1">{t.account}</p>
           </div>
         </button>
       </div>
