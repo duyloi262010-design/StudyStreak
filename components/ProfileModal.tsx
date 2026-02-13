@@ -1,0 +1,166 @@
+
+import React, { useState } from 'react';
+import { UserProfile, Language } from '../types';
+import { TRANSLATIONS } from '../constants';
+
+interface Props {
+  profile: UserProfile;
+  onSave: (updated: UserProfile) => void;
+  onClose: () => void;
+}
+
+const AVATAR_OPTIONS = [
+  '👨‍🎓', '👩‍🎓', '🧑‍🏫', '👩‍🏫', '🧑‍🔬', '👩‍🔬', '🧑‍💻', '👩‍💻', '👨‍🚀', '👩‍🚀', '🕵️', '👷',
+  '🦖', '🦕', '🦊', '🐱', '🐶', '🐼', '🦁', '🐯', '🐨', '🦉', '🐝', '🦄',
+  '🚀', '🧠', '📚', '🎨', '🧪', '🏆', '💡', '🌍', '💎', '🎨', '🎹', '🎸',
+  '🥳', '😎', '🤠', '👻', '👾', '🤖', '🌈', '🔥', '✨', '🍎', '🍓', '🎮'
+];
+
+const ProfileModal: React.FC<Props> = ({ profile, onSave, onClose }) => {
+  const [username, setUsername] = useState(profile.username);
+  const [petName, setPetName] = useState(profile.pet.name);
+  const [avatar, setAvatar] = useState(profile.avatar || AVATAR_OPTIONS[0]);
+  const [language, setLanguage] = useState<Language>(profile.language || 'vi');
+  const [dailyGoalHours, setDailyGoalHours] = useState(profile.dailyGoalHours || 3);
+
+  const t = TRANSLATIONS[language];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({ 
+      ...profile, 
+      username, 
+      avatar, 
+      language,
+      dailyGoalHours,
+      pet: {
+        ...profile.pet,
+        name: petName
+      }
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 z-[60] animate-fadeIn">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden border-b-[10px] border-slate-200 dark:border-slate-800 transition-colors">
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-black text-slate-950 dark:text-white uppercase tracking-tighter">{t.profile}</h2>
+            <button 
+              onClick={onClose} 
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-950 transition-all text-2xl font-black"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Language Selection */}
+            <div className="space-y-2">
+              <label className="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-2">{t.language}</label>
+              <div className="flex gap-2 p-1 bg-slate-50 dark:bg-black rounded-2xl border border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setLanguage('vi')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-black text-xs transition-all ${language === 'vi' ? 'bg-white dark:bg-slate-800 shadow-md text-slate-950 dark:text-white' : 'text-slate-400'}`}
+                >
+                  <span>🇻🇳</span> Tiếng Việt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguage('en')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-black text-xs transition-all ${language === 'en' ? 'bg-white dark:bg-slate-800 shadow-md text-slate-950 dark:text-white' : 'text-slate-400'}`}
+                >
+                  <span>🇺🇸</span> English
+                </button>
+              </div>
+            </div>
+
+            {/* Daily Goal Selection */}
+            <div className="space-y-3 bg-slate-50 dark:bg-black p-5 rounded-3xl border border-slate-100 dark:border-slate-800">
+              <div className="flex justify-between items-center">
+                <label className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Mục tiêu học tập</label>
+                <span className="text-sm font-black text-purple-600 bg-purple-100 dark:bg-purple-900/30 px-3 py-1 rounded-lg">{dailyGoalHours} giờ / ngày</span>
+              </div>
+              <input 
+                type="range" 
+                min="1" 
+                max="12" 
+                step="0.5"
+                value={dailyGoalHours} 
+                onChange={(e) => setDailyGoalHours(parseFloat(e.target.value))}
+                className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-600"
+              />
+              <p className="text-[9px] font-bold text-slate-400 italic text-center">* Đạt mục tiêu này để nhận +1 EXP thưởng mỗi ngày!</p>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <div className="relative group mb-4">
+                <div className="w-24 h-24 bg-slate-50 dark:bg-black rounded-full flex items-center justify-center text-5xl shadow-inner border-4 border-white dark:border-slate-800">
+                  {avatar}
+                </div>
+              </div>
+              <p className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.3em] mb-4">{t.avatarLabel}</p>
+              <div className="w-full bg-slate-50 dark:bg-black/50 p-4 rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                <div className="grid grid-cols-6 gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
+                  {AVATAR_OPTIONS.map(a => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAvatar(a)}
+                      className={`w-9 h-9 flex items-center justify-center rounded-xl text-xl transition-all ${avatar === a ? 'bg-green-600 text-white' : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800'}`}
+                    >
+                      {a}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <label className="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-2">{t.usernameLabel}</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  maxLength={20}
+                  className="w-full p-4 bg-slate-50 dark:bg-black border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:border-green-600 outline-none font-black text-sm dark:text-white transition-all shadow-sm"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-2">{(t as any).petNameLabel || "Pet Name"}</label>
+                <input
+                  type="text"
+                  value={petName}
+                  onChange={(e) => setPetName(e.target.value)}
+                  maxLength={20}
+                  className="w-full p-4 bg-slate-50 dark:bg-black border-2 border-slate-100 dark:border-slate-800 rounded-2xl focus:border-green-600 outline-none font-black text-sm dark:text-white transition-all shadow-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-4 font-black text-slate-500 uppercase text-xs tracking-widest"
+              >
+                {t.close}
+              </button>
+              <button
+                type="submit"
+                className="flex-2 py-4 px-8 bg-green-600 text-white font-black rounded-2xl hover:bg-green-700 shadow-xl transition-all uppercase text-xs tracking-[0.2em]"
+              >
+                {t.saveProfile} ✨
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProfileModal;
