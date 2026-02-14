@@ -30,8 +30,8 @@ const ReviewBoard: React.FC<Props> = ({ result, onBack }) => {
               key={q.id} 
               className={`p-6 rounded-[2.5rem] border-2 transition-all shadow-sm ${
                 isCorrect 
-                ? 'border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/30 dark:bg-emerald-900/10' 
-                : 'border-rose-100 dark:border-rose-900/30 bg-rose-50/30 dark:bg-rose-900/10'
+                ? 'border-emerald-100 dark:border-emerald-800/50 bg-emerald-50/40 dark:bg-emerald-900/20' 
+                : 'border-rose-100 dark:border-rose-800/50 bg-rose-50/40 dark:bg-rose-900/20'
               }`}
             >
               <div className="flex justify-between items-start mb-4">
@@ -49,13 +49,13 @@ const ReviewBoard: React.FC<Props> = ({ result, onBack }) => {
                 {q.options.map((opt, optIdx) => {
                   let styles = "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400";
                   if (optIdx === q.correctAnswerIndex) {
-                    styles = "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-200 dark:shadow-none ring-2 ring-emerald-500 ring-offset-2 dark:ring-offset-slate-900";
+                    styles = "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-200 dark:shadow-none ring-2 ring-emerald-500 ring-offset-2 dark:ring-offset-slate-900 transition-all";
                   } else if (optIdx === userAnswer && !isCorrect) {
-                    styles = "bg-rose-500 border-rose-500 text-white shadow-lg shadow-rose-200 dark:shadow-none";
+                    styles = "bg-rose-500 border-rose-500 text-white shadow-lg shadow-rose-200 dark:shadow-none transition-all";
                   }
 
                   return (
-                    <div key={optIdx} className={`p-4 rounded-2xl border-2 font-bold flex items-center transition-colors ${styles}`}>
+                    <div key={optIdx} className={`p-4 rounded-2xl border-2 font-bold flex items-center ${styles}`}>
                       <span className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center mr-3 text-sm">
                         {String.fromCharCode(65 + optIdx)}
                       </span>
@@ -65,13 +65,13 @@ const ReviewBoard: React.FC<Props> = ({ result, onBack }) => {
                 })}
               </div>
 
-              <div className="bg-green-600 dark:bg-green-900/50 text-white p-6 rounded-3xl shadow-xl relative overflow-hidden">
-                <div className="absolute right-0 top-0 text-5xl opacity-10 p-2">🦖</div>
+              <div className="bg-green-600 dark:bg-green-800/60 text-white p-6 rounded-3xl shadow-xl relative overflow-hidden transition-all">
+                <div className="absolute right-0 top-0 text-5xl opacity-10 p-2 pointer-events-none">🦖</div>
                 <div className="flex items-center mb-2 relative z-10">
                   <span className="text-xl mr-2">🧠</span>
                   <span className="font-black uppercase text-[10px] tracking-widest">Lời giải từ Kiến trúc sư AI</span>
                 </div>
-                <p className="text-green-50 dark:text-green-100 leading-relaxed font-bold relative z-10">
+                <p className="text-green-50 dark:text-emerald-50 leading-relaxed font-bold relative z-10">
                   {q.explanation}
                 </p>
               </div>

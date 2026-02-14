@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { UserProfile, PetAvatarType } from '../types';
 import { chatWithPetStream } from '../geminiService';
 import { DAYS_OF_WEEK } from '../constants';
@@ -118,7 +119,13 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md flex items-end md:items-center justify-center p-4 z-50 font-sans">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2rem] shadow-2xl flex flex-col h-[85vh] md:h-[700px] overflow-hidden animate-scaleIn border-b-8 border-slate-100 dark:border-slate-800 transition-colors">
+      <motion.div 
+        initial={{ y: 100, opacity: 0, scale: 0.9 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 100, opacity: 0, scale: 0.9 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2rem] shadow-2xl flex flex-col h-[85vh] md:h-[700px] overflow-hidden border-b-8 border-slate-100 dark:border-slate-800 transition-colors"
+      >
         {/* Header */}
         <div className={`${visual.bgColor} p-5 md:p-6 text-white relative overflow-hidden`}>
           <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none">
@@ -137,28 +144,35 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
             <div className="flex items-center space-x-2">
               <button 
                 onClick={onClose} 
-                className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl font-black text-xs uppercase tracking-widest hover:bg-white/30 transition-all border border-white/10"
+                className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl font-black text-xs uppercase tracking-widest hover:bg-white/30 transition-all border border-white/10 active:scale-95"
               >
                 Quay lại
               </button>
-              <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-all font-black text-2xl">✕</button>
             </div>
           </div>
         </div>
 
         {/* Chat Area */}
         <div ref={scrollRef} className="flex-grow overflow-y-auto p-5 md:p-6 space-y-5 bg-slate-50 dark:bg-slate-950 custom-scrollbar transition-colors">
-          {messages.map((m, idx) => (
-            <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] p-4 rounded-[1.5rem] font-bold text-base shadow-sm leading-relaxed transition-all ${
-                m.role === 'user' 
-                ? `${visual.bgColor} text-white rounded-tr-none` 
-                : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none border border-slate-100 dark:border-slate-700'
-              }`}>
-                {m.text || (m.role === 'model' && idx === messages.length - 1 ? '...' : '')}
-              </div>
-            </div>
-          ))}
+          <AnimatePresence initial={false}>
+            {messages.map((m, idx) => (
+              <motion.div 
+                key={idx} 
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`max-w-[85%] p-4 rounded-[1.5rem] font-bold text-base shadow-sm leading-relaxed transition-all ${
+                  m.role === 'user' 
+                  ? `${visual.bgColor} text-white rounded-tr-none` 
+                  : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tl-none border border-slate-100 dark:border-slate-700'
+                }`}>
+                  {m.text || (m.role === 'model' && idx === messages.length - 1 ? '...' : '')}
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
           {isTyping && messages[messages.length-1].text === "" && (
             <div className="flex justify-start">
               <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700 space-x-2 flex shadow-sm">
@@ -190,7 +204,7 @@ const PetChat: React.FC<Props> = ({ profile, onClose }) => {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

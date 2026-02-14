@@ -9,31 +9,25 @@ export async function generateStudyQuiz(
   lessons: SubjectLesson[],
   language: Language = 'vi'
 ): Promise<Question[]> {
-  // Sử dụng Gemini 3 Flash - Model nhanh nhất hiện tại
-  const model = 'gemini-3-flash-preview';
+  // Sử dụng model Flash Lite để tối ưu tốc độ phản hồi nhanh nhất có thể
+  const model = 'gemini-flash-lite-latest';
   
-  // Tối ưu prompt: Yêu cầu số lượng câu hỏi vừa đủ (3 câu/môn) để giảm thời gian sinh văn bản
-  const prompt = `
-    Generate a concise multiple-choice quiz for a ${grade} student.
-    Context:
-    ${lessons.map(l => `- Subject: ${l.subject} (Book: ${l.textbook}): ${l.lesson}`).join('\n')}
-    
-    Rules:
-    1. Exactly 3 high-quality questions per subject (to ensure speed).
-    2. Output in ${language === 'vi' ? 'VIETNAMESE' : 'ENGLISH'}.
-    3. Short explanations (max 15 words).
-    4. Mix difficulty: easy, medium, hard.
-  `;
+  const prompt = `Generate a ${language === 'vi' ? 'Vietnamese' : 'English'} quiz in JSON format for ${grade}.
+Subjects and lessons: ${lessons.map(l => `${l.subject} (${l.textbook}): ${l.lesson}`).join('; ')}.
+Each subject must have 3 questions. 
+Total questions: ${lessons.length * 3}.
+Explanations must be short (max 15 words).
+Difficulty: assign easy, medium, or hard.`;
 
   const response = await ai.models.generateContent({
     model,
     contents: prompt,
     config: {
       responseMimeType: "application/json",
-      // Vô hiệu hóa thinking để giảm độ trễ (latency) tối đa
-      thinkingConfig: { thinkingBudget: 0 },
-      // Giới hạn tokens để model không viết quá dài
-      maxOutputTokens: 1500,
+      temperature: 0.1, // Một chút sáng tạo nhưng vẫn giữ tốc độ cao
+      topK: 1,
+      thinkingConfig: { thinkingBudget: 0 }, // Tắt thinking để phản hồi tức thì
+      maxOutputTokens: 1200,
       responseSchema: {
         type: Type.OBJECT,
         properties: {
@@ -47,13 +41,15 @@ export async function generateStudyQuiz(
                 questionText: { type: Type.STRING },
                 options: {
                   type: Type.ARRAY,
-                  items: { type: Type.STRING }
+                  items: { type: Type.STRING },
+                  minItems: 4,
+                  maxItems: 4
                 },
                 correctAnswerIndex: { type: Type.INTEGER },
                 explanation: { type: Type.STRING },
                 difficulty: { 
-                  type: Type.STRING, 
-                  description: "easy, medium, or hard" 
+                  type: Type.STRING,
+                  description: "Must be 'easy', 'medium', or 'hard'"
                 }
               },
               required: ["id", "subject", "questionText", "options", "correctAnswerIndex", "explanation", "difficulty"]
@@ -66,7 +62,12 @@ export async function generateStudyQuiz(
   });
 
   const text = response.text || '{"questions": []}';
-  return JSON.parse(text).questions;
+  try {
+    return JSON.parse(text).questions;
+  } catch (e) {
+    console.error("JSON Parsing Error:", e);
+    return [];
+  }
 }
 
 export async function chatWithPetStream(
@@ -75,31 +76,29 @@ export async function chatWithPetStream(
   history: { role: 'user' | 'model', parts: { text: string }[] }[],
   context: { todaySubjects: string[], timeStudiedToday: number }
 ) {
-  const model = 'gemini-3-flash-preview';
+  // Model Flash Lite là lựa chọn tốt nhất cho độ trễ cực thấp
+  const model = 'gemini-flash-lite-latest';
   const lang = profile.language === 'vi' ? 'Vietnamese' : 'English';
   
   const dailyGoalSeconds = (profile.dailyGoalHours || 3) * 3600;
   const progressPercent = Math.min(100, Math.floor((context.timeStudiedToday / dailyGoalSeconds) * 100));
-  const remainingSubjects = context.todaySubjects.join(', ');
 
-  const systemInstruction = `
-    Bạn là ${profile.pet.name}, linh vật học tập. Trò chuyện với ${profile.username} bằng tiếng ${lang}.
-    Streak: ${profile.streak} ngày. Tiến độ: ${progressPercent}%. Cần học: ${remainingSubjects}.
-    
-    PHONG CÁCH: 
-    - TRẢ LỜI CỰC NGẮN (dưới 15 từ).
-    - Năng động, lém lỉnh, dùng emoji (🦖, ✨, ⚡).
-    - Không giải thích dài dòng.
-  `;
+  // Tinh chỉnh Instruction để model không tốn token dư thừa
+  const systemInstruction = `You are ${profile.pet.name}, a fast-responding study pet for ${profile.username} (Streak: ${profile.streak}, Progress: ${progressPercent}%). 
+Speak ${lang}. 
+STRICT RULE: Be ULTRA BRIEF (<10 words). Respond INSTANTLY. 
+Use 1-2 emojis max (🦖,✨). Be encouraging but concise. No long greetings.`;
 
   const responseStream = await ai.models.generateContentStream({
     model,
     contents: [...history, { role: 'user', parts: [{ text: message }] }],
     config: { 
       systemInstruction,
-      temperature: 0.5, // Thấp hơn để phản hồi nhanh và ổn định hơn
+      temperature: 0.3, // Thấp hơn để giảm thời gian "suy nghĩ" các phương án từ vựng
+      topK: 1,         // Greedy decoding - nhanh nhất
+      topP: 0.8,
       thinkingConfig: { thinkingBudget: 0 },
-      maxOutputTokens: 150 // Giới hạn độ dài để stream nhanh hơn nữa
+      maxOutputTokens: 50 // Giới hạn token đầu ra thấp để ép model trả lời ngắn và nhanh hơn
     }
   });
 
